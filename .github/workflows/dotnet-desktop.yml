@@ -39,4 +39,4 @@ jobs:
         vs-prerelease: true
 
     - name: Build
-      run: msbuild Versatile\Versatile.csproj -property:Configuration=Release
+      run: msbuild Versatile\Versatile.csproj -t:rebuild -verbosity:diag -property:Configuration=Release
