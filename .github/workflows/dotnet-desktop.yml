@@ -38,5 +38,11 @@ jobs:
       with:
         vs-prerelease: true
 
+    # Restore the application to populate the obj folder with RuntimeIdentifiers
+    - name: Restore the application
+      run: msbuild Versatile\Versatile.csproj /t:Restore /p:Configuration=$env:Configuration
+      env:
+        Configuration: ${{ matrix.configuration }}
+
     - name: Build
-      run: msbuild Versatile\Versatile.csproj -t:rebuild -verbosity:diag -property:Configuration=Release
+      run: msbuild Versatile\Versatile.csproj -property:Configuration=Release
