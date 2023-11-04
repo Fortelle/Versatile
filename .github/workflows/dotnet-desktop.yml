@@ -59,6 +59,7 @@ jobs:
     - name: Archive Build
       shell: pwsh
       run: |
+        mkdir ${{ env.OUT_DIR }}
         Compress-Archive -Path .\${{ env.Project_Name }}\bin\* -DestinationPath ${{ env.OUT_DIR }}\Versatile-v${{env.APP_VERSION}}.zip
 
     - name: Release
