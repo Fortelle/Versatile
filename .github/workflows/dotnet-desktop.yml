@@ -18,6 +18,7 @@ jobs:
     env:
       Solution_Name: Versatile.sln
       Project_Name: Versatile
+      OUT_DIR: ./release
 
     steps:
     - name: Checkout
@@ -37,26 +38,35 @@ jobs:
       with:
         vs-prerelease: true
 
-    # Restore the application to populate the obj folder with RuntimeIdentifiers
     - name: Restore the application
-      run: msbuild ${{ env.Project_Name }}\${{ env.Project_Name }}.csproj /t:Restore /p:Configuration=$env:Configuration
+      run: msbuild ${{ env.Project_Name }} /t:Restore /p:Configuration=$env:Configuration
       env:
         Configuration: ${{ matrix.configuration }}
 
     - name: Build
-      run: msbuild ${{ env.Project_Name }}\${{ env.Project_Name }}.csproj /p:Configuration=$env:Configuration
+      run: msbuild ${{ env.Project_Name }} /p:Configuration=$env:Configuration /p:PublishDir=.\..\.publish 
 
-    - name: Get Version
-      id: get-version
-      uses: mavrosxristoforos/get-xml-info@1.0
+
+    - name: Get version
+      uses: naminodarie/get-net-sdk-project-versions-action@v1.1.2
+      id: get_version
       with:
-        xml-file: "${{ env.Project_Name }}/${{ env.Project_Name }}.csproj"
-        xpath: "//Project/PropertyGroup/AssemblyVersion"
+        proj-path: ./${{ env.Project_Name }}/${{ env.Project_Name }}.csproj
+        
+    - run: |
+        echo "APP_VERSION=${{steps.get_version.outputs.assembly-version}}" >> $env:GITHUB_ENV
+
+    - name: Archive Build
+      shell: pwsh
+      run: |
+        Compress-Archive .\.publish\* ${{ env.OUT_DIR }}\Versatile-v${{env.APP_VERSION}}.zip
 
     - name: Release
       uses: softprops/action-gh-release@v1
       with:
-        tag_name: v${{ steps.get-version.outputs.info }}
+        name: Versatile-v${{ env.APP_VERSION }}
+        tag_name: v${{ env.APP_VERSION }}
+        files: |
+          ${{ env.OUT_DIR }}\Versatile-v${{env.APP_VERSION}}.zip
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        
