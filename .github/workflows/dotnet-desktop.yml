@@ -34,15 +34,10 @@ jobs:
 
     # Add  MSBuild to the PATH: https://github.com/microsoft/setup-msbuild
     - name: Setup MSBuild.exe
+      id: setup_msbuild
       uses: microsoft/setup-msbuild@v1.0.2
       with:
         vs-prerelease: true
 
-    # Restore the application to populate the obj folder with RuntimeIdentifiers
-    - name: Restore the application
-      run: msbuild Versatile\Versatile.csproj /t:Restore /p:Configuration=$env:Configuration
-      env:
-        Configuration: ${{ matrix.configuration }}
-
-    - name: Build
-      run: msbuild Versatile\Versatile.csproj -property:Configuration=Release
+    - name: echo msbuild path
+      run: echo "${{ steps.setup_msbuild.outputs.msbuildPath }}"
