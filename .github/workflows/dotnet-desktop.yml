@@ -60,10 +60,9 @@ jobs:
         mkdir ${{ env.OUT_DIR }}
         
     - name: Archive Build
-      shell: pwsh
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: |
-        Compress-Archive -Path .\${{ env.Project_Name }}\ -DestinationPath ${{ env.OUT_DIR }}\Versatile-v${{env.APP_VERSION}}.zip
+        Compress-Archive -Path .\${{ env.Project_Name }}\* -DestinationPath ${{ env.OUT_DIR }}\Versatile-v${{env.APP_VERSION}}.zip
 
     - name: Release
       uses: softprops/action-gh-release@v1
