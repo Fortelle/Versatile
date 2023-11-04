@@ -56,8 +56,13 @@ jobs:
         
     - name: Archive Build
       run: |
-        Compress-Archive .\*.* -DestinationPath a.zip
+        cd
+        Compress-Archive .\*.* a.zip
+        dir
 
+    - run: |
+        dir
+        
     - name: Release
       uses: softprops/action-gh-release@v1
       with:
