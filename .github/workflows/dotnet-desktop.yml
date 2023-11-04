@@ -53,7 +53,7 @@ jobs:
         
     - name: Archive Build
       run: |
-        Compress-Archive .\* -DestinationPath ${{ env.OUT_DIR }}\Versatile-v${{env.APP_VERSION}}.zip
+        Compress-Archive .\Versatile\* -DestinationPath ${{ env.OUT_DIR }}\Versatile-v${{env.APP_VERSION}}.zip
 
     - name: Release
       uses: softprops/action-gh-release@v1
