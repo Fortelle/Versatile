@@ -39,6 +39,16 @@ jobs:
         vs-prerelease: true
 
 
+
+    - name: Restore the application
+      run: msbuild ${{ env.Project_Name }} /t:Restore /p:Configuration=$env:Configuration
+      env:
+        Configuration: ${{ matrix.configuration }}
+    - name: Build
+      run: msbuild ${{ env.Project_Name }} /p:Configuration=$env:Configuration
+
+
+
     - name: Get version
       uses: naminodarie/get-net-sdk-project-versions-action@v1.1.2
       id: get_version
@@ -56,7 +66,7 @@ jobs:
         
     - name: Archive Build
       run: |
-        Compress-Archive .\Versatile\* a.zip
+        Compress-Archive .\Versatile\bin\* Versatile-v${{env.APP_VERSION}}.zip
 
     - run: |
         dir
@@ -67,6 +77,6 @@ jobs:
         name: Versatile-v${{ env.APP_VERSION }}
         tag_name: v${{ env.APP_VERSION }}
         files: |
-          ${{ env.OUT_DIR }}\Versatile-v${{env.APP_VERSION}}.zip
+          .\Versatile-v${{env.APP_VERSION}}.zip
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
