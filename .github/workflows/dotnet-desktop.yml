@@ -18,7 +18,7 @@ jobs:
     env:
       Solution_Name: Versatile.sln
       Project_Name: Versatile
-      OUT_DIR: ./release
+      OUT_DIR: .\.release
 
     steps:
     - name: Checkout
@@ -44,7 +44,7 @@ jobs:
         Configuration: ${{ matrix.configuration }}
 
     - name: Build
-      run: msbuild ${{ env.Project_Name }} /p:Configuration=$env:Configuration /p:PublishDir=.\..\.publish 
+      run: msbuild ${{ env.Project_Name }} /p:Configuration=$env:Configuration
 
 
     - name: Get version
@@ -59,7 +59,7 @@ jobs:
     - name: Archive Build
       shell: pwsh
       run: |
-        Compress-Archive .\.publish\* ${{ env.OUT_DIR }}\Versatile-v${{env.APP_VERSION}}.zip
+        Compress-Archive -Path .\${{ env.Project_Name }}\bin\* -DestinationPath ${{ env.OUT_DIR }}\Versatile-v${{env.APP_VERSION}}.zip
 
     - name: Release
       uses: softprops/action-gh-release@v1
