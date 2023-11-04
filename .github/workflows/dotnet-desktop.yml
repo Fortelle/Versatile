@@ -51,6 +51,9 @@ jobs:
     - run: |
         mkdir ${{ env.OUT_DIR }}
         
+    - run: |
+        dir
+        
     - name: Archive Build
       run: |
         Compress-Archive .\Versatile\* -DestinationPath ${{ env.OUT_DIR }}\Versatile-v${{env.APP_VERSION}}.zip
