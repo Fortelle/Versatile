@@ -66,10 +66,10 @@ jobs:
         
     - name: Archive Build
       run: |
-        Compress-Archive .\Versatile\bin\* .\${{ env.OUT_DIR }}\Versatile-v${{env.APP_VERSION}}.zip
+        Compress-Archive .\Versatile\bin\* .\a.zip
 
     - run: |
-        dir .release
+        dir
         
     - name: Release
       uses: softprops/action-gh-release@v1
@@ -77,6 +77,6 @@ jobs:
         name: Versatile-v${{ env.APP_VERSION }}
         tag_name: v${{ env.APP_VERSION }}
         files: |
-          .release\Versatile-v${{env.APP_VERSION}}.zip
+          a.zip
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
