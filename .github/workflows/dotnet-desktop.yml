@@ -14,11 +14,10 @@ jobs:
       matrix:
         configuration: [Release]
 
-    runs-on: windows-latest  # For a list of available runner types, refer to
-                             # https://help.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idruns-on
-
+    runs-on: windows-latest
     env:
-      Solution_Name: Versatile.sln                         # Replace with your solution name, i.e. MyWpfApp.sln.
+      Solution_Name: Versatile.sln
+      Project_Name: Versatile
 
     steps:
     - name: Checkout
@@ -34,10 +33,57 @@ jobs:
 
     # Add  MSBuild to the PATH: https://github.com/microsoft/setup-msbuild
     - name: Setup MSBuild.exe
-      id: setup_msbuild
       uses: microsoft/setup-msbuild@v1.0.2
       with:
         vs-prerelease: true
 
-    - name: echo msbuild path
-      run: echo "${{ steps.setup_msbuild.outputs.msbuildPath }}"
+    # Restore the application to populate the obj folder with RuntimeIdentifiers
+    - name: Restore the application
+      run: msbuild ${{ env.Project_Name }}\${{ env.Project_Name }}.csproj /t:Restore /p:Configuration=$env:Configuration
+      env:
+        Configuration: ${{ matrix.configuration }}
+
+    - name: Build
+      run: msbuild ${{ env.Project_Name }}\${{ env.Project_Name }}.csproj /p:Configuration=$env:Configuration
+
+    - name: Get Version
+      id: get-version
+      uses: mavrosxristoforos/get-xml-info@1.0
+      with:
+        xml-file: "${{ env.Project_Name }}/${{ env.Project_Name }}.csproj"
+        xpath: "//Project/PropertyGroup/AssemblyVersion"
+
+    - name: Archive Release
+      uses: thedoctor0/zip-release@main
+      with:
+        directory: ${{ env.Project_Name }}/${{ env.Project_Name }}/bin/x86/Release/
+        type: 'zip'
+        filename: ${{ env.Project_Name }}-v${{ steps.get-version.outputs.info }}.zip
+
+    - name: Create release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: v${{ steps.get-version.outputs.info }}
+        release_name: ${{ env.Project_Name }}-v${{ steps.get-version.outputs.info }}
+        draft: true
+        prerelease: true
+
+    - name: Upload release
+      uses: actions/upload-release-asset@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ${{ env.Project_Name }}/${{ env.Project_Name }}/bin/x86/Release/${{ env.Project_Name }}-v${{ steps.get-version.outputs.info }}.zip
+        asset_name: ${{ env.Project_Name }}-v${{ steps.get-version.outputs.info }}.zip
+        asset_content_type: application/zip
+
+    - name: Publish release
+      uses: eregon/publish-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        release_id: ${{ steps.create_release.outputs.id }}
