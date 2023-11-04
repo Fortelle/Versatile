@@ -56,9 +56,7 @@ jobs:
         
     - name: Archive Build
       run: |
-        cd
-        Compress-Archive .\*.* a.zip
-        dir
+        Compress-Archive .\Versatile\* a.zip
 
     - run: |
         dir
