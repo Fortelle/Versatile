@@ -2,23 +2,27 @@ name: .NET Core Desktop
 
 on:
   push:
-    branches: [ "master" ]
+    branches:
+      - master
+    tags:
+      - v**
   pull_request:
-    branches: [ "master" ]
+    branches:
+      - master
+    tags:
+      - v**
 
 jobs:
 
   build:
 
-    strategy:
-      matrix:
-        configuration: [Release]
-
     runs-on: windows-latest
+    
     env:
       Solution_Name: Versatile.sln
       Project_Name: Versatile
-      OUT_DIR: .release
+      Output_Folder: .output
+      Release_Folder: .release
 
     steps:
     - name: Checkout
@@ -26,57 +30,40 @@ jobs:
       with:
         fetch-depth: 0
 
-    # Install the .NET Core workload
     - name: Install .NET Core
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: 7.0.x
 
-    # Add  MSBuild to the PATH: https://github.com/microsoft/setup-msbuild
-    - name: Setup MSBuild.exe
+    - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v1.0.2
       with:
         vs-prerelease: true
 
 
-
     - name: Restore the application
-      run: msbuild ${{ env.Project_Name }} /t:Restore /p:Configuration=$env:Configuration
-      env:
-        Configuration: ${{ matrix.configuration }}
+      run: msbuild ${{ env.Project_Name }} /t:Restore /p:Configuration=release
+        
     - name: Build
-      run: msbuild ${{ env.Project_Name }} /p:Configuration=$env:Configuration
+      run: msbuild ${{ env.Project_Name }} /p:Configuration=release /p:OutputPath=.\${{ env.Output_Folder }}
 
-
-
-    - name: Get version
-      uses: naminodarie/get-net-sdk-project-versions-action@v1.1.2
-      id: get_version
-      with:
-        proj-path: ./${{ env.Project_Name }}/${{ env.Project_Name }}.csproj
-        
-    - run: |
-        echo "APP_VERSION=${{steps.get_version.outputs.assembly-version}}" >> $env:GITHUB_ENV
 
     - run: |
-        mkdir ${{ env.OUT_DIR }}
-        
+        echo "App_Version=${{ github.ref }}" >> $env:GITHUB_ENV
+
     - run: |
-        dir
-        
+        mkdir ${{ env.Release_Folder }}
+
     - name: Archive Build
       run: |
-        Compress-Archive .\Versatile\bin\* .\.release\Versatile-v${{env.APP_VERSION}}.zip
+        Compress-Archive .\${{ env.Output_Folder }}\* .\${{ env.Release_Folder }}\${{ env.Project_Name }}-v${{ env.App_Version }}.zip
 
-    - run: |
-        dir
-        
     - name: Release
       uses: softprops/action-gh-release@v1
       with:
-        name: Versatile-v${{ env.APP_VERSION }}
-        tag_name: v${{ env.APP_VERSION }}
+        name: ${{ env.Project_Name }}-v${{ env.App_Version }}
+        tag_name: v${{ env.App_Version }}
         files: |
-          .release\Versatile-v${{env.APP_VERSION}}.zip
+          ${{ env.Release_Folder }}/Versatile-v${{env.App_Version}}.zip
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
