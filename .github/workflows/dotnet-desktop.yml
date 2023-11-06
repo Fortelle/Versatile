@@ -36,7 +36,7 @@ jobs:
       run: msbuild ${{ env.Project_Name }} /t:Restore /p:Configuration=release
         
     - name: Build
-      run: msbuild ${{ env.Project_Name }} /p:Configuration=release /p:OutputPath=.\${{ env.Output_Folder }}
+      run: msbuild ${{ env.Project_Name }} /p:Configuration=release /p:OutputPath=.\..\${{ env.Output_Folder }}
 
     - run: |
         echo "App_Version=${{ github.ref }}" >> $env:GITHUB_ENV
@@ -45,6 +45,7 @@ jobs:
     - name: Archive Build
       run: |
         mkdir ${{ env.Release_Folder }}
+        dir
         Compress-Archive .\${{ env.Output_Folder }}\* .\${{ env.Release_Folder }}\${{ env.Package_Name }}
 
     - name: Release
