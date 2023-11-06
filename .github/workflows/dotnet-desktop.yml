@@ -66,7 +66,7 @@ jobs:
         
     - name: Archive Build
       run: |
-        Compress-Archive .\Versatile\bin\* .\Versatile-v${{env.APP_VERSION}}.zip
+        Compress-Archive .\Versatile\bin\* .\.release\Versatile-v${{env.APP_VERSION}}.zip
 
     - run: |
         dir
@@ -77,6 +77,6 @@ jobs:
         name: Versatile-v${{ env.APP_VERSION }}
         tag_name: v${{ env.APP_VERSION }}
         files: |
-          Versatile-v${{env.APP_VERSION}}.zip
+          .release\Versatile-v${{env.APP_VERSION}}.zip
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
