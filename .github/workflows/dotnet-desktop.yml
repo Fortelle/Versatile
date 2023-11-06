@@ -2,13 +2,6 @@ name: .NET Core Desktop
 
 on:
   push:
-    branches:
-      - master
-    tags:
-      - v**
-  pull_request:
-    branches:
-      - master
     tags:
       - v**
 
@@ -37,8 +30,6 @@ jobs:
 
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v1.0.2
-      with:
-        vs-prerelease: true
 
 
     - name: Restore the application
@@ -47,23 +38,21 @@ jobs:
     - name: Build
       run: msbuild ${{ env.Project_Name }} /p:Configuration=release /p:OutputPath=.\${{ env.Output_Folder }}
 
-
     - run: |
         echo "App_Version=${{ github.ref }}" >> $env:GITHUB_ENV
-
-    - run: |
-        mkdir ${{ env.Release_Folder }}
+        echo "Package_Name=${{ env.Project_Name }}-v${{ env.App_Version }}.zip" >> $env:GITHUB_ENV
 
     - name: Archive Build
       run: |
-        Compress-Archive .\${{ env.Output_Folder }}\* .\${{ env.Release_Folder }}\${{ env.Project_Name }}-v${{ env.App_Version }}.zip
+        mkdir ${{ env.Release_Folder }}
+        Compress-Archive .\${{ env.Output_Folder }}\* .\${{ env.Release_Folder }}\${{ env.Package_Name }}
 
     - name: Release
       uses: softprops/action-gh-release@v1
       with:
-        name: ${{ env.Project_Name }}-v${{ env.App_Version }}
+        name: v${{ env.App_Version }}
         tag_name: v${{ env.App_Version }}
         files: |
-          ${{ env.Release_Folder }}/Versatile-v${{env.App_Version}}.zip
+          ${{ env.Release_Folder }}/${{ env.Package_Name }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
